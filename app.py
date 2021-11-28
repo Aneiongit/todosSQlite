@@ -1,16 +1,5 @@
-from flask import Flask, request, jsonify
-import sqlite3
-
-app = Flask(__name__)
-
-
-def db_connection():
-    conn = None
-    try:
-        conn = sqlite3.connect("todos.db")
-    except sqlite3.error as e:
-        print(e)
-    return conn
+from db import *
+from flask import request, jsonify
 
 
 @app.route("/todos", methods=["GET", "POST"])
@@ -32,7 +21,7 @@ def all_todos():
         title = request.form["title"]
         description = request.form["description"]
         done = request.form["done"]
-        sql = """INSERT INTO todos (title, description, done) VALUES (?, ?, ?)"""
+        sql = "INSERT INTO todos (title, description, done) VALUES (?, ?, ?)"
         cursor = cursor.execute(sql, (title, description, done))
         conn.commit()
 
@@ -55,12 +44,7 @@ def single_todo(id):
             return "Something wrong", 404
 
     if request.method == "PUT":
-        sql = """UPDATE todos
-                SET title=?,
-                    description=?,
-                    done=?
-                WHERE id=?"""
-
+        sql = "UPDATE todos SET title=?, description=?, done=? WHERE id=?"
         title = request.form["title"]
         description = request.form["description"]
         done = request.form["done"]
@@ -75,7 +59,7 @@ def single_todo(id):
         return jsonify(updated_todo)
 
     if request.method == "DELETE":
-        sql = """DELETE FROM todos WHERE id=?"""
+        sql = "DELETE FROM todos WHERE id=?"
         conn.execute(sql, (id,))
         conn.commit()
         return f"{id}", 200
